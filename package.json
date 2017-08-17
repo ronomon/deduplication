@@ -1,0 +1,60 @@
+{
+  "name": "@ronomon/deduplication",
+  "version": "1.0.0",
+  "description": "Fast multi-threaded content-dependent chunking deduplication for Buffers in C++ with a reference implementation in Javascript. Ships with extensive tests, a fuzz test and a benchmark.",
+  "main": "binding.node",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronomon/deduplication.git"
+  },
+  "keywords": [
+    "async",
+    "backup",
+    "bandwidth",
+    "block size",
+    "boundary shift",
+    "cas",
+    "cdc",
+    "content-addressable storage",
+    "content-defined chunking",
+    "content-dependent chunking",
+    "cryptographic hash calculation",
+    "cut-point",
+    "deduplication",
+    "differential compression",
+    "elimination",
+    "fingerprint",
+    "gear hash",
+    "identical",
+    "maximum",
+    "minimum",
+    "normalized chunking",
+    "pattern",
+    "rabin karp",
+    "ratio",
+    "reference",
+    "reduce",
+    "redundancy",
+    "redundant",
+    "rsync",
+    "sliding block",
+    "sliding window",
+    "storage",
+    "tabulation hash",
+    "variable-sized chunking"
+  ],
+  "author": "Joran Dirk Greef",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ronomon/deduplication/issues"
+  },
+  "homepage": "https://github.com/ronomon/deduplication#readme",
+  "scripts": {
+    "postinstall": "node-gyp clean",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "@ronomon/queue": "^2.1.0",
+    "nan": "^2.6.2"
+  }
+}
