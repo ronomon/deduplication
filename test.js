@@ -79,13 +79,13 @@ function generateSource() {
   } else {
     var size = 0;
   }
-  var buffers = [];
-  while (size > 0) {
-    var buffer = Test.randomBytes(Math.min(1024 * 1024, size));
-    buffers.push(buffer);
-    size -= buffer.length;
+  if (Test.random() < 0.2) {
+    // Long repeating runs of the same byte tend to hit the maximum threshold.
+    // This is good for deduplication ratio (and good for bug-spotting).
+    return Buffer.alloc(size, Math.floor(Test.random() * 256));
+  } else {
+    return Test.randomBytes(size);
   }
-  return Buffer.concat(buffers);
 }
 
 function generateTarget(test) {
