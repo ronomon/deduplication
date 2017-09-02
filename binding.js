@@ -186,6 +186,12 @@ function deduplicate(
     if (chunkSize <= 0) {
       throw new Error('chunkSize <= 0');
     }
+    if (chunkSize < minimum && flags === 0) {
+      throw new Error('chunkSize < minimum && flags === 0');
+    }
+    if (chunkSize > maximum) {
+      throw new Error('chunkSize > maximum');
+    }
     if (sourceOffset + chunkSize > sourceLength) {
       throw new Error('sourceOffset + chunkSize > sourceLength');
     }

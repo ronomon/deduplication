@@ -209,6 +209,12 @@ class DeduplicateWorker : public Nan::AsyncWorker {
       if (chunkSize <= 0) {
         return SetErrorMessage("chunkSize <= 0");
       }
+      if (chunkSize < minimum && flags == 0) {
+        return SetErrorMessage("chunkSize < minimum && flags === 0");
+      }
+      if (chunkSize > maximum) {
+        return SetErrorMessage("chunkSize > maximum");
+      }
       if (sourceOffset + chunkSize > sourceLength) {
         return SetErrorMessage("sourceOffset + chunkSize > sourceLength");
       }
