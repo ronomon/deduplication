@@ -97,7 +97,7 @@ function cut(
   sourceOffset,
   sourceSize
 ) {
-  if (sourceSize <= minimum) return sourceSize;
+  if (sourceSize <= minimum) return -1;
   if (sourceSize > maximum) sourceSize = maximum;
   var sourceStart = sourceOffset;
   var sourceBalance = average - Math.min(
@@ -116,7 +116,7 @@ function cut(
     hash = (hash >>> 1) + TABLE[source[sourceOffset++]];
     if (!(hash & mask2)) return sourceOffset - sourceStart;
   }
-  return sourceOffset - sourceStart;
+  return -1;
 }
 
 function deduplicate(
@@ -173,10 +173,7 @@ function deduplicate(
   var mask2 = mask(bits - 1);
   assertInteger('mask2', mask2);
   while (sourceOffset < sourceLength) {
-    // If more `source` buffers will follow and if current `source` buffer does
-    // not have more than `minimum` remaining, then avoid artificial cutpoint:
-    if (flags === 0 && (sourceLength - sourceOffset) <= minimum) break;
-    var chunkSize = cut(
+    var result = cut(
       average,
       minimum,
       maximum,
@@ -186,8 +183,18 @@ function deduplicate(
       sourceOffset,
       sourceLength - sourceOffset
     );
-    if (chunkSize <= 0) {
-      throw new Error('chunkSize <= 0');
+    if (result < 0) {
+      // No natural cut point was found.
+      var chunkSize = sourceLength - sourceOffset;
+      if (chunkSize > maximum) chunkSize = maximum;
+      // If source is not the last buffer, we may yet find a larger chunk.
+      // If chunkSize === maximum, we will not find a larger chunk and can emit.
+      if (flags === 0 && chunkSize < maximum) break;
+    } else {
+      var chunkSize = result;
+    }
+    if (chunkSize === 0) {
+      throw new Error('chunkSize === 0');
     }
     if (chunkSize < minimum && flags === 0) {
       throw new Error('chunkSize < minimum && flags === 0');

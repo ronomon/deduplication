@@ -75,7 +75,7 @@ uint32_t centerSize(
   return size;
 }
 
-uint32_t cut(
+int32_t cut(
   const uint32_t average,
   const uint32_t minimum,
   const uint32_t maximum,
@@ -85,7 +85,7 @@ uint32_t cut(
   uint32_t sourceOffset,
   uint32_t sourceSize
 ) {
-  if (sourceSize <= minimum) return sourceSize;
+  if (sourceSize <= minimum) return -1;
   if (sourceSize > maximum) sourceSize = maximum;
   const uint32_t sourceStart = sourceOffset;
   const uint32_t sourceLength1 = sourceOffset + centerSize(
@@ -104,7 +104,7 @@ uint32_t cut(
     hash = (hash >> 1) + TABLE[source[sourceOffset++]];
     if (!(hash & mask2)) return sourceOffset - sourceStart;
   }
-  return sourceOffset - sourceStart;
+  return -1;
 }
 
 int hash(
@@ -196,8 +196,7 @@ class DeduplicateWorker : public Nan::AsyncWorker {
 
   void Execute() {
     while (sourceOffset < sourceLength) {
-      if (flags == 0 && (sourceLength - sourceOffset) <= minimum) break;
-      const uint32_t chunkSize = cut(
+      const int32_t result = cut(
         average,
         minimum,
         maximum,
@@ -207,8 +206,16 @@ class DeduplicateWorker : public Nan::AsyncWorker {
         sourceOffset,
         sourceLength - sourceOffset
       );
-      if (chunkSize <= 0) {
-        return SetErrorMessage("chunkSize <= 0");
+      uint32_t chunkSize;
+      if (result < 0) {
+        chunkSize = sourceLength - sourceOffset;
+        if (chunkSize > maximum) chunkSize = maximum;
+        if (flags == 0 && chunkSize < maximum) break;
+      } else {
+        chunkSize = (uint32_t) result;
+      }
+      if (chunkSize == 0) {
+        return SetErrorMessage("chunkSize === 0");
       }
       if (chunkSize < minimum && flags == 0) {
         return SetErrorMessage("chunkSize < minimum && flags === 0");
@@ -372,6 +379,7 @@ NAN_METHOD(targetSize) {
 }
 
 NAN_MODULE_INIT(Init) {
+  assert(INTEGER_MAX <= INT32_MAX);
   NAN_EXPORT(target, deduplicate);
   NAN_EXPORT(target, targetSize);
 }
