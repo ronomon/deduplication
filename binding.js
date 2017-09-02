@@ -173,6 +173,9 @@ function deduplicate(
   var mask2 = mask(bits - 1);
   assertInteger('mask2', mask2);
   while (sourceOffset < sourceLength) {
+    // If more `source` buffers will follow and if current `source` buffer does
+    // not have more than `minimum` remaining, then avoid artificial cutpoint:
+    if (flags === 0 && (sourceLength - sourceOffset) <= minimum) break;
     var chunkSize = cut(
       average,
       minimum,
@@ -195,7 +198,6 @@ function deduplicate(
     if (sourceOffset + chunkSize > sourceLength) {
       throw new Error('sourceOffset + chunkSize > sourceLength');
     }
-    if (flags === 0 && (sourceOffset + chunkSize) === sourceLength) break;
     if (targetOffset + 32 + 4 > targetLength) {
       throw new Error('target overflow');
     }

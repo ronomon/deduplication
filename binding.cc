@@ -196,6 +196,7 @@ class DeduplicateWorker : public Nan::AsyncWorker {
 
   void Execute() {
     while (sourceOffset < sourceLength) {
+      if (flags == 0 && (sourceLength - sourceOffset) <= minimum) break;
       const uint32_t chunkSize = cut(
         average,
         minimum,
@@ -218,7 +219,6 @@ class DeduplicateWorker : public Nan::AsyncWorker {
       if (sourceOffset + chunkSize > sourceLength) {
         return SetErrorMessage("sourceOffset + chunkSize > sourceLength");
       }
-      if (flags == 0 && (sourceOffset + chunkSize) == sourceLength) break;
       if (targetOffset + 32 + 4 > targetLength) {
         return SetErrorMessage("target overflow");
       }
