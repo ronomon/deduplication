@@ -83,9 +83,13 @@ int32_t cut(
   const uint32_t mask2,
   const unsigned char *source,
   uint32_t sourceOffset,
-  uint32_t sourceSize
+  uint32_t sourceSize,
+  const uint32_t flags
 ) {
-  if (sourceSize <= minimum) return -1;
+  if (sourceSize <= minimum) {
+    if (flags == 0) return 0;
+    return sourceSize;
+  }
   if (sourceSize > maximum) sourceSize = maximum;
   const uint32_t sourceStart = sourceOffset;
   const uint32_t sourceLength1 = sourceOffset + centerSize(
@@ -104,7 +108,8 @@ int32_t cut(
     hash = (hash >> 1) + TABLE[source[sourceOffset++]];
     if (!(hash & mask2)) return sourceOffset - sourceStart;
   }
-  return -1;
+  if (flags == 0 && sourceSize < maximum) return 0;
+  return sourceSize;
 }
 
 int hash(
@@ -196,7 +201,7 @@ class DeduplicateWorker : public Nan::AsyncWorker {
 
   void Execute() {
     while (sourceOffset < sourceLength) {
-      const int32_t result = cut(
+      const uint32_t chunkSize = cut(
         average,
         minimum,
         maximum,
@@ -204,19 +209,10 @@ class DeduplicateWorker : public Nan::AsyncWorker {
         mask2,
         source,
         sourceOffset,
-        sourceLength - sourceOffset
+        sourceLength - sourceOffset,
+        flags
       );
-      uint32_t chunkSize;
-      if (result < 0) {
-        chunkSize = sourceLength - sourceOffset;
-        if (chunkSize > maximum) chunkSize = maximum;
-        if (flags == 0 && chunkSize < maximum) break;
-      } else {
-        chunkSize = (uint32_t) result;
-      }
-      if (chunkSize == 0) {
-        return SetErrorMessage("chunkSize === 0");
-      }
+      if (chunkSize == 0) break;
       if (chunkSize < minimum && flags == 0) {
         return SetErrorMessage("chunkSize < minimum && flags === 0");
       }
