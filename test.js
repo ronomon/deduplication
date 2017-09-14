@@ -430,6 +430,7 @@ queue.onData = function(testIndex, end) {
     var targetOffsetAdvanced = -1;
     var calls = 0;
     function verify(sourceOffset, targetOffset) {
+      Test.equal(hash(test.source), test.sourceHash, namespace, 'source');
       var sourceSize = sourceOffset - test.sourceOffset;
       Test.equal(isInt(sourceSize), test.sourceSize, namespace, 'sourceSize');
       var targetSize = targetOffset - target.offset;
