@@ -121,21 +121,21 @@ int hash(
 ) {
   const EVP_MD *digest = EVP_sha256();
   if (!digest) return 0;
-  EVP_MD_CTX ctx;
-  EVP_MD_CTX_init(&ctx);
-  if (!EVP_DigestInit_ex(&ctx, digest, NULL)) {
-    EVP_MD_CTX_cleanup(&ctx);
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx) return 0;
+  if (!EVP_DigestInit_ex(ctx, digest, NULL)) {
+    EVP_MD_CTX_free(ctx);
     return 0;
   }
-  if (!EVP_DigestUpdate(&ctx, source + sourceOffset, (size_t) sourceSize)) {
-    EVP_MD_CTX_cleanup(&ctx);
+  if (!EVP_DigestUpdate(ctx, source + sourceOffset, (size_t) sourceSize)) {
+    EVP_MD_CTX_free(ctx);
     return 0;
   }
-  if (!EVP_DigestFinal_ex(&ctx, target + targetOffset, NULL)) {
-    EVP_MD_CTX_cleanup(&ctx);
+  if (!EVP_DigestFinal_ex(ctx, target + targetOffset, NULL)) {
+    EVP_MD_CTX_free(ctx);
     return 0;
   }
-  EVP_MD_CTX_cleanup(&ctx);
+  EVP_MD_CTX_free(ctx);
   return 1;
 }
 
@@ -246,7 +246,7 @@ class DeduplicateWorker : public Nan::AsyncWorker {
       Nan::New<v8::Number>(sourceOffset),
       Nan::New<v8::Number>(targetOffset)
     };
-    callback->Call(3, argv);
+    callback->Call(3, argv, async_resource);
   }
 
  private:
