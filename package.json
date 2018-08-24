@@ -56,5 +56,8 @@
   "dependencies": {
     "@ronomon/queue": "^3.0.0",
     "nan": "^2.10.0"
+  },
+  "engines": {
+    "node": ">=10.0.0"
   }
 }
