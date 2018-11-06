@@ -59,6 +59,7 @@
   },
   "homepage": "https://github.com/ronomon/deduplication#readme",
   "scripts": {
+    "prepublishOnly": "rm -f binding.node",
     "postinstall": "node-gyp clean",
     "test": "node test.js"
   },
