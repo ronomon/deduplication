@@ -9,6 +9,7 @@
     "binding.gyp",
     "binding.js",
     "demo.js",
+    "index.d.ts",
     "table.js",
     "test.js"
   ],
@@ -69,5 +70,8 @@
   },
   "engines": {
     "node": ">=10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.18"
   }
 }
