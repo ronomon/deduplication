@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 uint32_t ceil_div(uint32_t x, uint32_t y) {
-  return (x % y) ? ((x / y) + 1) : (x / y);
+  return (x % y) ? (x / y) : ((x / y) + 1);
 }
 
 const uint32_t AVERAGE_MIN = 256;
