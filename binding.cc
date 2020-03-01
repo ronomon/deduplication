@@ -140,7 +140,7 @@ int hash(
 }
 
 int integer(v8::Local<v8::Value> value) {
-  return value->IsUint32() && value->Uint32Value() < INTEGER_MAX;
+  return value->IsUint32() && Nan::To<uint32_t>(value).ToChecked() < INTEGER_MAX;
 }
 
 uint32_t logarithm2(const uint32_t integer) {
@@ -271,20 +271,20 @@ NAN_METHOD(deduplicate) {
   if (!integer(info[0])) {
     return Nan::ThrowError("average must be an unsigned 31 bit integer");
   }
-  const uint32_t average = info[0]->Uint32Value();
+  const uint32_t average = Nan::To<uint32_t>(info[0]).ToChecked();
   if (average < AVERAGE_MIN) return Nan::ThrowError("average < AVERAGE_MIN");
   if (average > AVERAGE_MAX) return Nan::ThrowError("average > AVERAGE_MAX");
   if (!integer(info[1])) {
     return Nan::ThrowError("minimum must be an unsigned 31 bit integer");
   }
-  const uint32_t minimum = info[1]->Uint32Value();
+  const uint32_t minimum = Nan::To<uint32_t>(info[1]).ToChecked();
   if (minimum < MINIMUM_MIN) return Nan::ThrowError("minimum < MINIMUM_MIN");
   if (minimum > MINIMUM_MAX) return Nan::ThrowError("minimum > MINIMUM_MAX");
   if (minimum >= average) return Nan::ThrowError("minimum >= average");
   if (!integer(info[2])) {
     return Nan::ThrowError("maximum must be an unsigned 31 bit integer");
   }
-  const uint32_t maximum = info[2]->Uint32Value();
+  const uint32_t maximum = Nan::To<uint32_t>(info[2]).ToChecked();
   if (maximum < MAXIMUM_MIN) return Nan::ThrowError("maximum < MAXIMUM_MIN");
   if (maximum > MAXIMUM_MAX) return Nan::ThrowError("maximum > MAXIMUM_MAX");
   if (maximum <= average) return Nan::ThrowError("maximum <= average");
@@ -298,11 +298,11 @@ NAN_METHOD(deduplicate) {
   if (!integer(info[4])) {
     return Nan::ThrowError("sourceOffset must be an unsigned 31 bit integer");
   }
-  uint32_t sourceOffset = info[4]->Uint32Value();
+  uint32_t sourceOffset = Nan::To<uint32_t>(info[4]).ToChecked();
   if (!integer(info[5])) {
     return Nan::ThrowError("sourceSize must be an unsigned 31 bit integer");
   }
-  const uint32_t sourceSize = info[5]->Uint32Value();
+  const uint32_t sourceSize = Nan::To<uint32_t>(info[5]).ToChecked();
   const uint32_t sourceLength = sourceOffset + sourceSize;
   if (sourceLength > node::Buffer::Length(sourceHandle)) {
     return Nan::ThrowError("source overflow");
@@ -314,7 +314,7 @@ NAN_METHOD(deduplicate) {
   if (!integer(info[7])) {
     return Nan::ThrowError("targetOffset must be an unsigned 31 bit integer");
   }
-  uint32_t targetOffset = info[7]->Uint32Value();
+  uint32_t targetOffset = Nan::To<uint32_t>(info[7]).ToChecked();
   const uint32_t chunks = ceil_div(sourceSize, minimum);
   const uint32_t targetLength = targetOffset + (chunks * (32 + 4));
   if (targetLength > node::Buffer::Length(targetHandle)) {
@@ -323,7 +323,7 @@ NAN_METHOD(deduplicate) {
   if (!integer(info[8])) {
     return Nan::ThrowError("flags must be an unsigned 31 bit integer");
   }
-  const uint32_t flags = info[8]->Uint32Value();
+  const uint32_t flags = Nan::To<uint32_t>(info[8]).ToChecked();
   if (flags != 0 && flags != 1) {
     return Nan::ThrowError("flags has an unknown flag");
   }
@@ -363,13 +363,13 @@ NAN_METHOD(targetSize) {
   if (!integer(info[0])) {
     return Nan::ThrowError("minimum must be an unsigned 31 bit integer");
   }
-  const uint32_t minimum = info[0]->Uint32Value();
+  const uint32_t minimum = Nan::To<uint32_t>(info[0]).ToChecked();
   if (minimum < MINIMUM_MIN) return Nan::ThrowError("minimum < MINIMUM_MIN");
   if (minimum > MINIMUM_MAX) return Nan::ThrowError("minimum > MINIMUM_MAX");
   if (!integer(info[1])) {
     return Nan::ThrowError("sourceSize must be an unsigned 31 bit integer");
   }
-  const uint32_t sourceSize = info[1]->Uint32Value();
+  const uint32_t sourceSize = Nan::To<uint32_t>(info[1]).ToChecked();
   const uint32_t targetSize = ceil_div(sourceSize, minimum) * (32 + 4);
   info.GetReturnValue().Set(Nan::New<v8::Number>(targetSize));
 }
@@ -380,6 +380,6 @@ NAN_MODULE_INIT(Init) {
   NAN_EXPORT(target, targetSize);
 }
 
-NODE_MODULE(binding, Init)
+NAN_MODULE_WORKER_ENABLED(binding, Init)
 
 // S.D.G.
